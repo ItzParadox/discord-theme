@@ -1,0 +1,120 @@
+/*
+ * Chillax Optimizations (drop-in overrides)
+ * Import this AFTER chillax.css
+ * Goal: keep the flashy feel, but reduce paint/blur cost and speed up interactions.
+ */
+
+/* ===== Global performance guards ===== */
+/* Limit expensive blurs unless hovered/focused */
+.floating-window-titlebar,
+.elevationBorderHigh__2b2f1,
+.floating-window.resizable,
+.floating-window-content,
+.editor-wrapper,
+.monaco-editor,
+.monaco-editor-background,
+.monaco-editor .inputarea.ime-input,
+.monaco-editor .margin {
+  backdrop-filter: none !important;
+}
+/* Only blur when interacting */
+.floating-window-titlebar:hover,
+.elevationBorderHigh__2b2f1:hover {
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Scale animations: tone down to avoid layout thrash */
+.clickable__91a9d,
+.interactive_bf202d {
+  transition: transform .18s ease !important;
+}
+.clickable__91a9d:hover,
+.interactive_bf202d:hover {
+  transform: translateY(-1px) scale(1.03) !important;
+}
+
+/* Channel hover: remove letter-spacing (layout) */
+.mainContent-20q_Hp { transition: transform .18s ease, opacity .18s ease !important; }
+.mainContent-20q_Hp:hover { transform: translateX(2px); opacity: .96; letter-spacing: 0 !important; }
+.mainContent-20q_Hp::before, .mainContent-20q_Hp::after { transition: opacity .18s ease, transform .18s ease !important; }
+
+/* Pop/menu animations: faster in/out */
+.container__55c99,
+.css-1x99fvh-menu,
+.css-3vaxre-menu,
+.drawerSizingWrapper__08434,
+.layer-2aCOJ3 div[role="dialog"],
+.layer-2aCOJ3 div[role="menu"],
+.messagesPopoutWrap__45690,
+.popout-1KHNAq[role="listbox"] {
+  animation-duration: .18s !important;
+}
+
+/* "New Messages" / "Jump to Present" buttons: reduce transitions */
+.newMessagesBar__0f481.barBase__0f481,
+[class*="jumpToPresentBar"] > button:last-child {
+  transition: transform .18s ease, padding .18s ease, color .18s ease, font-size 0s !important;
+}
+.newMessagesBar__0f481.barBase__0f481:hover,
+[class*="jumpToPresentBar"]:hover > button:last-child {
+  transform: translateY(-1px);
+}
+
+/* Tooltips: shorter, crisp */
+.tooltip-14MtrL { animation-duration: .16s !important; }
+
+/* Massive shadows → soft border; helps low-end GPUs */
+.numberBadge__2b1f5 { box-shadow: 0 0 6px 1px rgba(0,0,0,.35) !important; }
+.item__58105 { box-shadow: 0 0 2px currentColor !important; }
+
+/* Welcome text animation: keep feature but shorten + reduce travel */
+body:before {
+  animation: chl 1.6s ease both !important;
+}
+@-webkit-keyframes chl {
+  from { transform: translate(-60%,-100%); }
+  30% { transform: translate(-60%,8%); }
+  70% { transform: translate(-60%,8%); }
+  to { transform: translate(-60%,-100%); }
+}
+@keyframes chl {
+  from { transform: translate(-60%,-100%); }
+  30% { transform: translate(-60%,8%); }
+  70% { transform: translate(-60%,8%); }
+  to { transform: translate(-60%,-100%); }
+}
+
+/* Spotify timeline hover gradient is fine; ensure no unintended transitions */
+.timeline-UWmgAx .barFill-Dhkah7 { transition: width .16s linear !important; }
+
+/* User popout animation: reduce to .22s */
+#app-mount [class*="userPopout"][aria-modal="true"] {
+  -webkit-animation-duration: .22s !important;
+          animation-duration: .22s !important;
+}
+
+/* Reactions: keep rounded look but avoid border repaint on hover */
+.reaction_f8896c,
+.reactionMe_f8896c {
+  will-change: transform;
+  transition: transform .12s ease !important;
+  border: 1px solid transparent !important;
+}
+.reaction_f8896c:hover,
+.reactionMe_f8896c:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.35) !important;
+}
+
+/* About-me clamp: hide custom scrollbar styling to reduce paint cost */
+.clamped-2ZePhX::-webkit-scrollbar,
+.clamped-2ZePhX::-webkit-scrollbar-track,
+.clamped-2ZePhX::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

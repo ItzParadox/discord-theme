@@ -1,0 +1,87 @@
+/*
+ * Paradox Optimizations (drop-in overrides)
+ * Import this AFTER Paradox Theme.css
+ * Goal: snappier feel + fewer repaints while keeping the same look.
+ */
+
+/* ===== Performance knobs ===== */
+:root {
+  /* Faster, snappier timings */
+  --ml-dur: 260ms !important;
+  --ml-ease: cubic-bezier(.2,.8,.25,1) !important;
+  --paradox-topbar-h: 28px;
+
+  /* Scrollbar + outlines off cost-heavy glows */
+  --paradox-shadow-soft: 0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* Avoid layout-costly letter-spacing transitions */
+.mainContent-20q_Hp,
+[class*="peopleListItem" i],
+[class*="name" i] {
+  transition-property: transform, opacity !important;
+}
+
+/* Channel hover: use translate/opacity instead of letter-spacing */
+.mainContent-20q_Hp:hover {
+  transform: translateX(2px);
+  opacity: .96;
+  letter-spacing: 0 !important;
+}
+
+/* Member list slide in/out — smooth both ways */
+#app-mount [class*="membersWrap" i] {
+  transition: transform var(--ml-dur) var(--ml-ease), opacity var(--ml-dur) var(--ml-ease) !important;
+  will-change: transform, opacity;
+}
+
+/* When the list is present but hidden (Discord toggles aria-hidden on container sometimes),
+   slide it off-screen instead of popping display:none */
+#app-mount [class*="membersWrap" i][aria-hidden="true"] {
+  transform: translateX(16px);
+  opacity: 0;
+  pointer-events: none;
+}
+#app-mount [class*="membersWrap" i][aria-hidden="false"],
+#app-mount:has([class*="membersWrap" i]) [class*="membersWrap" i] {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Chat area should not jump on member-list toggle; prefer transform on the list only */
+#app-mount [class*="chatContent" i] {
+  transition: none !important;
+  margin-right: 0 !important;
+}
+
+/* Bounce tap feedback: shorter, crisper */
+@keyframes ml-bounce { 0%{transform:scale(1)} 40%{transform:scale(.94)} 100%{transform:scale(1)} }
+#app-mount [aria-label*="Member List" i]:active,
+#app-mount [aria-label*="Members" i]:active { animation: ml-bounce 220ms var(--ml-ease) !important; }
+
+/* Mentions: keep style but remove background-image/filters that can trigger repaints */
+span.mention, a.mention, [class*="mention" i][role="button"], [class*="roleMention" i] {
+  background: rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Presence rings: ensure no outlines/shadows */
+[class*="rs-"], [class*="rs-"]::before, [class*="rs-"]::after { box-shadow: none !important; filter: none !important; border: none !important; }
+
+/* Popouts/modals: drop back to initial styles defined by Paradox and avoid blurs */
+[class*="overlayBackground" i] { backdrop-filter: none !important; }
+
+/* Selection highlight: keep but avoid text-shadow */
+*::selection { text-shadow: none !important; }
+
+/* Reduce extremely high z-index cost on the label pseudo-element hover changes */
+body::after {
+  transition: transform .18s ease, color .18s ease !important;
+  letter-spacing: 0 !important;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
